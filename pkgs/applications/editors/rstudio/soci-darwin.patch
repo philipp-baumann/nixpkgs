@@ -1,0 +1,116 @@
+From 9209e8efcfea6c706f1fd9bd9464efd65800965c Mon Sep 17 00:00:00 2001
+From: Philipp Baumann <baumann-philipp@protonmail.com>
+Date: Thu, 21 Dec 2023 20:00:37 +0100
+Subject: [PATCH 1/4] fix darwin build by adding Kerberos from apple SDK
+
+---
+ pkgs/development/libraries/soci/default.nix | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/pkgs/development/libraries/soci/default.nix b/pkgs/development/libraries/soci/default.nix
+index 154924922ad0d8..9f341d027613cf 100644
+--- a/pkgs/development/libraries/soci/default.nix
++++ b/pkgs/development/libraries/soci/default.nix
+@@ -4,7 +4,9 @@
+ , sqlite
+ , postgresql
+ , boost
+-, lib, stdenv
++, darwin
++, lib
++, stdenv
+ }:
+ 
+ stdenv.mkDerivation rec {
+@@ -29,7 +31,13 @@ stdenv.mkDerivation rec {
+   # Do not build static libraries
+   cmakeFlags = [ "-DSOCI_STATIC=OFF" "-DCMAKE_CXX_STANDARD=11" "-DSOCI_TESTS=off" ];
+ 
+-  nativeBuildInputs = [ cmake ];
++  nativeBuildInputs = [
++    cmake
++  ] ++ lib.optionals stdenv.isDarwin (
++      (with darwin.apple_sdk_11_0.frameworks; [
++        Kerberos
++      ])
++  );
+   buildInputs = [
+     sqlite
+     postgresql
+
+From 4727f7e4ea2ebb7fa7ac54b7ccd94bb01e59aecd Mon Sep 17 00:00:00 2001
+From: Philipp Baumann <baumann-philipp@protonmail.com>
+Date: Thu, 21 Dec 2023 20:18:24 +0100
+Subject: [PATCH 2/4] reorder inputs
+
+---
+ pkgs/development/libraries/soci/default.nix | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pkgs/development/libraries/soci/default.nix b/pkgs/development/libraries/soci/default.nix
+index 9f341d027613cf..9ed708e0e7d9ef 100644
+--- a/pkgs/development/libraries/soci/default.nix
++++ b/pkgs/development/libraries/soci/default.nix
+@@ -1,10 +1,10 @@
+ { cmake
++, darwin
+ , fetchFromGitHub
+ , fetchpatch
+ , sqlite
+ , postgresql
+ , boost
+-, darwin
+ , lib
+ , stdenv
+ }:
+
+From fbc48412d12137c8d282423f51948d241bd96d50 Mon Sep 17 00:00:00 2001
+From: Philipp Baumann <baumann-philipp@protonmail.com>
+Date: Thu, 21 Dec 2023 20:20:41 +0100
+Subject: [PATCH 3/4] lint
+
+---
+ pkgs/development/libraries/soci/default.nix | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/pkgs/development/libraries/soci/default.nix b/pkgs/development/libraries/soci/default.nix
+index 9ed708e0e7d9ef..e25179cb825973 100644
+--- a/pkgs/development/libraries/soci/default.nix
++++ b/pkgs/development/libraries/soci/default.nix
+@@ -34,9 +34,9 @@ stdenv.mkDerivation rec {
+   nativeBuildInputs = [
+     cmake
+   ] ++ lib.optionals stdenv.isDarwin (
+-      (with darwin.apple_sdk_11_0.frameworks; [
+-        Kerberos
+-      ])
++    (with darwin.apple_sdk_11_0.frameworks; [
++      Kerberos
++    ])
+   );
+   buildInputs = [
+     sqlite
+
+From 501e6b4f5a94ce71efb422d3ae74a329464c7624 Mon Sep 17 00:00:00 2001
+From: Philipp Baumann <baumann-philipp@protonmail.com>
+Date: Thu, 21 Dec 2023 20:42:19 +0100
+Subject: [PATCH 4/4] minor lint to follow previous style
+
+---
+ pkgs/development/libraries/soci/default.nix | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/pkgs/development/libraries/soci/default.nix b/pkgs/development/libraries/soci/default.nix
+index e25179cb825973..ebdd1f1cdd7de9 100644
+--- a/pkgs/development/libraries/soci/default.nix
++++ b/pkgs/development/libraries/soci/default.nix
+@@ -5,8 +5,7 @@
+ , sqlite
+ , postgresql
+ , boost
+-, lib
+-, stdenv
++, lib, stdenv
+ }:
+ 
+ stdenv.mkDerivation rec {
