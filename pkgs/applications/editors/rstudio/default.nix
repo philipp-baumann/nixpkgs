@@ -85,7 +85,7 @@ let
 
   description = "Set of integrated tools for the R language";
 in
-# (if server then stdenv.mkDerivation else stdenv.mkDerivation)
+(if server then stdenv.mkDerivation else stdenv.mkDerivation)
   (rec {
     inherit pname version src RSTUDIO_VERSION_MAJOR RSTUDIO_VERSION_MINOR RSTUDIO_VERSION_PATCH RSTUDIO_VERSION_SUFFIX;
 
