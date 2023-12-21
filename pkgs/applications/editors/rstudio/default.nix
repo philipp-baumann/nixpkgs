@@ -1,6 +1,6 @@
 { lib
 , stdenv
-, mkDerivation
+#, mkDerivation
 , fetchurl
 , fetchpatch
 , fetchFromGitHub
@@ -11,11 +11,7 @@
 , zlib
 , openssl
 , R
-, qtbase
-, qtxmlpatterns
-, qtsensors
-, qtwebengine
-, qtwebchannel
+, qt6
 , quarto
 , libuuid
 , hunspellDicts
@@ -31,11 +27,14 @@
 , nodejs
 , mkYarnModules
 , fetchYarnDeps
-, qmake
+# , qt6
+# , qmake
 , server ? false # build server version
 , sqlite
 , pam
 , nixosTests
+, krb5
+, darwin
 }:
 
 let
@@ -46,6 +45,14 @@ let
   RSTUDIO_VERSION_MINOR  = "09";
   RSTUDIO_VERSION_PATCH  = "0";
   RSTUDIO_VERSION_SUFFIX = "+463";
+
+  qt_inputs = builtins.attrValues {
+    inherit (qt6)
+      # qtxmlpatterns
+      qtsensors
+      qtwebengine
+      qtwebchannel;
+  };
 
   src = fetchFromGitHub {
     owner = "rstudio";
@@ -77,7 +84,7 @@ let
 
   description = "Set of integrated tools for the R language";
 in
-(if server then stdenv.mkDerivation else mkDerivation)
+(if server then stdenv.mkDerivation else stdenv.mkDerivation)
   (rec {
     inherit pname version src RSTUDIO_VERSION_MAJOR RSTUDIO_VERSION_MINOR RSTUDIO_VERSION_PATCH RSTUDIO_VERSION_SUFFIX;
 
@@ -88,7 +95,12 @@ in
       jdk
       pandoc
       nodejs
-    ] ++ lib.optionals (!server) [
+      krb5
+    ] ++ lib.optionals stdenv.isDarwin (
+      (with darwin.apple_sdk_11_0.frameworks; [
+        Kerberos
+      ])
+    ) ++ lib.optionals (!server) [
       copyDesktopItems
     ];
 
@@ -106,11 +118,7 @@ in
       sqlite.dev
       pam
     ] else [
-      qtbase
-      qtxmlpatterns
-      qtsensors
-      qtwebengine
-      qtwebchannel
+      qt_inputs
     ]);
 
     cmakeFlags = [
@@ -122,7 +130,7 @@ in
       "-DPANDOC_VERSION=${pandoc.version}"
       "-DCMAKE_INSTALL_PREFIX=${placeholder "out"}/lib/rstudio"
     ] ++ lib.optionals (!server) [
-      "-DQT_QMAKE_EXECUTABLE=${qmake}/bin/qmake"
+      "-DQT_QMAKE_EXECUTABLE=${qt6.qmake}/bin/qmake"
     ];
 
     # Hack RStudio to only use the input R and provided libclang.
@@ -216,7 +224,7 @@ in
       license = lib.licenses.agpl3Only;
       maintainers = with lib.maintainers; [ ciil cfhammill ];
       mainProgram = "rstudio" + lib.optionalString server "-server";
-      platforms = lib.platforms.linux;
+      platforms = lib.platforms.linux ++ lib.platforms.darwin;
     };
 
     passthru = {
