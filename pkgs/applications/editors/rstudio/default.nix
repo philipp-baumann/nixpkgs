@@ -22,13 +22,11 @@
 , pandoc
 , llvmPackages
 , yaml-cpp
-, soci
+# , soci
 , postgresql
 , nodejs
 , mkYarnModules
 , fetchYarnDeps
-# , qt6
-# , qmake
 , server ? false # build server version
 , sqlite
 , pam
@@ -45,6 +43,8 @@ let
   RSTUDIO_VERSION_MINOR  = "09";
   RSTUDIO_VERSION_PATCH  = "0";
   RSTUDIO_VERSION_SUFFIX = "+463";
+  
+  soci_patch = ./soci-patch.nix;
 
   qt_inputs = builtins.attrValues {
     inherit (qt6)
@@ -84,7 +84,7 @@ let
 
   description = "Set of integrated tools for the R language";
 in
-(if server then stdenv.mkDerivation else stdenv.mkDerivation)
+# (if server then stdenv.mkDerivation else stdenv.mkDerivation)
   (rec {
     inherit pname version src RSTUDIO_VERSION_MAJOR RSTUDIO_VERSION_MINOR RSTUDIO_VERSION_PATCH RSTUDIO_VERSION_SUFFIX;
 
@@ -95,12 +95,7 @@ in
       jdk
       pandoc
       nodejs
-      krb5
-    ] ++ lib.optionals stdenv.isDarwin (
-      (with darwin.apple_sdk_11_0.frameworks; [
-        Kerberos
-      ])
-    ) ++ lib.optionals (!server) [
+    ] ++ lib.optionals (!server) [
       copyDesktopItems
     ];
 
@@ -111,7 +106,7 @@ in
       R
       libuuid
       yaml-cpp
-      soci
+      soci_patch
       postgresql
       quarto
     ] ++ (if server then [
@@ -147,7 +142,7 @@ in
       substituteInPlace src/cpp/core/r_util/REnvironmentPosix.cpp --replace '@R@' ${R}
 
       substituteInPlace src/cpp/CMakeLists.txt \
-        --replace 'SOCI_LIBRARY_DIR "/usr/lib"' 'SOCI_LIBRARY_DIR "${soci}/lib"'
+        --replace 'SOCI_LIBRARY_DIR "/usr/lib"' 'SOCI_LIBRARY_DIR "${soci_patch}/lib"'
 
       substituteInPlace src/gwt/build.xml \
         --replace '@node@' ${nodejs} \
