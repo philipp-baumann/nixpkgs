@@ -31,7 +31,6 @@
 , sqlite
 , pam
 , nixosTests
-, krb5
 , darwin
 }:
 
