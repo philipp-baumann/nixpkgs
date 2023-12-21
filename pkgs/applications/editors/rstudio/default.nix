@@ -48,7 +48,7 @@ let
 
   qt_inputs = builtins.attrValues {
     inherit (qt6)
-      # qtxmlpatterns
+      # qtxmlpatterns # is not in qt6 anymore; is this needed?
       qtsensors
       qtwebengine
       qtwebchannel;
