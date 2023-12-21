@@ -22,7 +22,7 @@
 , pandoc
 , llvmPackages
 , yaml-cpp
-# , soci
+, soci
 , postgresql
 , nodejs
 , mkYarnModules
@@ -45,7 +45,7 @@ let
   
   # 2023-12-21: waiting for patch PR for soci to be accepted:
   # https://github.com/NixOS/nixpkgs/pull/275884
-  soci_patch = ./soci-patch.nix;
+  # soci_patch = ./soci-patch.nix;
 
   qt_inputs = builtins.attrValues {
     inherit (qt6)
@@ -107,7 +107,7 @@ in
       R
       libuuid
       yaml-cpp
-      soci_patch
+      soci
       postgresql
       quarto
     ] ++ (if server then [
@@ -137,13 +137,14 @@ in
       ./fix-resources-path.patch
       ./pandoc-nix-path.patch
       ./use-system-quarto.patch
+      ./soci-darwin.patch
     ];
 
     postPatch = ''
       substituteInPlace src/cpp/core/r_util/REnvironmentPosix.cpp --replace '@R@' ${R}
 
       substituteInPlace src/cpp/CMakeLists.txt \
-        --replace 'SOCI_LIBRARY_DIR "/usr/lib"' 'SOCI_LIBRARY_DIR "${soci_patch}/lib"'
+        --replace 'SOCI_LIBRARY_DIR "/usr/lib"' 'SOCI_LIBRARY_DIR "${soci}/lib"'
 
       substituteInPlace src/gwt/build.xml \
         --replace '@node@' ${nodejs} \
