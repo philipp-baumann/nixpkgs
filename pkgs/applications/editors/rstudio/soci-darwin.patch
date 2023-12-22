@@ -1,7 +1,7 @@
 From 9209e8efcfea6c706f1fd9bd9464efd65800965c Mon Sep 17 00:00:00 2001
 From: Philipp Baumann <baumann-philipp@protonmail.com>
 Date: Thu, 21 Dec 2023 20:00:37 +0100
-Subject: [PATCH 1/4] fix darwin build by adding Kerberos from apple SDK
+Subject: [PATCH 1/8] fix darwin build by adding Kerberos from apple SDK
 
 ---
  pkgs/development/libraries/soci/default.nix | 12 ++++++++++--
@@ -41,7 +41,7 @@ index 154924922ad0d8..9f341d027613cf 100644
 From 4727f7e4ea2ebb7fa7ac54b7ccd94bb01e59aecd Mon Sep 17 00:00:00 2001
 From: Philipp Baumann <baumann-philipp@protonmail.com>
 Date: Thu, 21 Dec 2023 20:18:24 +0100
-Subject: [PATCH 2/4] reorder inputs
+Subject: [PATCH 2/8] reorder inputs
 
 ---
  pkgs/development/libraries/soci/default.nix | 2 +-
@@ -67,7 +67,7 @@ index 9f341d027613cf..9ed708e0e7d9ef 100644
 From fbc48412d12137c8d282423f51948d241bd96d50 Mon Sep 17 00:00:00 2001
 From: Philipp Baumann <baumann-philipp@protonmail.com>
 Date: Thu, 21 Dec 2023 20:20:41 +0100
-Subject: [PATCH 3/4] lint
+Subject: [PATCH 3/8] lint
 
 ---
  pkgs/development/libraries/soci/default.nix | 6 +++---
@@ -94,7 +94,7 @@ index 9ed708e0e7d9ef..e25179cb825973 100644
 From 501e6b4f5a94ce71efb422d3ae74a329464c7624 Mon Sep 17 00:00:00 2001
 From: Philipp Baumann <baumann-philipp@protonmail.com>
 Date: Thu, 21 Dec 2023 20:42:19 +0100
-Subject: [PATCH 4/4] minor lint to follow previous style
+Subject: [PATCH 4/8] minor lint to follow previous style
 
 ---
  pkgs/development/libraries/soci/default.nix | 3 +--
@@ -114,3 +114,125 @@ index e25179cb825973..ebdd1f1cdd7de9 100644
  }:
  
  stdenv.mkDerivation rec {
+
+From 17ba91535836c1fa7877dd7997ca163329e907b9 Mon Sep 17 00:00:00 2001
+From: Philipp Baumann <baumann-philipp@protonmail.com>
+Date: Fri, 22 Dec 2023 09:04:54 +0100
+Subject: [PATCH 5/8] scoping changes by @wegank
+
+---
+ pkgs/development/libraries/soci/default.nix | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/pkgs/development/libraries/soci/default.nix b/pkgs/development/libraries/soci/default.nix
+index ebdd1f1cdd7de9..34610d7e30d37b 100644
+--- a/pkgs/development/libraries/soci/default.nix
++++ b/pkgs/development/libraries/soci/default.nix
+@@ -33,9 +33,7 @@ stdenv.mkDerivation rec {
+   nativeBuildInputs = [
+     cmake
+   ] ++ lib.optionals stdenv.isDarwin (
+-    (with darwin.apple_sdk_11_0.frameworks; [
+-      Kerberos
+-    ])
++    darwin.apple_sdk_11_0.frameworks.Kerberos
+   );
+   buildInputs = [
+     sqlite
+
+From be1d25f4a6d332fbae052a45787ead1fb59b7156 Mon Sep 17 00:00:00 2001
+From: Philipp Baumann <baumann-philipp@protonmail.com>
+Date: Fri, 22 Dec 2023 11:03:50 +0100
+Subject: [PATCH 6/8] use best practice; fix scope
+
+---
+ pkgs/development/libraries/soci/default.nix | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/pkgs/development/libraries/soci/default.nix b/pkgs/development/libraries/soci/default.nix
+index 34610d7e30d37b..636d14032dbdb0 100644
+--- a/pkgs/development/libraries/soci/default.nix
++++ b/pkgs/development/libraries/soci/default.nix
+@@ -33,7 +33,9 @@ stdenv.mkDerivation rec {
+   nativeBuildInputs = [
+     cmake
+   ] ++ lib.optionals stdenv.isDarwin (
+-    darwin.apple_sdk_11_0.frameworks.Kerberos
++    builtins.attrValues {
++      inherit (darwin.apple_sdk_11_0.frameworks) Kerberos;
++    }
+   );
+   buildInputs = [
+     sqlite
+
+From 369bfd8b9ecb3adac1f1b36a7fae11fb2f207b42 Mon Sep 17 00:00:00 2001
+From: Philipp Baumann <baumann-philipp@protonmail.com>
+Date: Fri, 22 Dec 2023 21:41:41 +0100
+Subject: [PATCH 7/8] use correct initial suggestion by @wegank
+
+---
+ pkgs/development/libraries/soci/default.nix | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/pkgs/development/libraries/soci/default.nix b/pkgs/development/libraries/soci/default.nix
+index 636d14032dbdb0..15e1085e98c7e1 100644
+--- a/pkgs/development/libraries/soci/default.nix
++++ b/pkgs/development/libraries/soci/default.nix
+@@ -32,11 +32,9 @@ stdenv.mkDerivation rec {
+ 
+   nativeBuildInputs = [
+     cmake
+-  ] ++ lib.optionals stdenv.isDarwin (
+-    builtins.attrValues {
+-      inherit (darwin.apple_sdk_11_0.frameworks) Kerberos;
+-    }
+-  );
++  ] ++ lib.optionals stdenv.isDarwin [
++    darwin.apple_sdk_11_0.frameworks.Kerberos
++  ];
+   buildInputs = [
+     sqlite
+     postgresql
+
+From 2803ab20e146a2c6b8dd331e70ba3b3580057d7a Mon Sep 17 00:00:00 2001
+From: Philipp Baumann <baumann-philipp@protonmail.com>
+Date: Fri, 22 Dec 2023 22:07:19 +0100
+Subject: [PATCH 8/8] Kerberos only for host platform; stick to convention
+
+---
+ pkgs/development/libraries/soci/default.nix | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/pkgs/development/libraries/soci/default.nix b/pkgs/development/libraries/soci/default.nix
+index 15e1085e98c7e1..ccf67d70ad68b2 100644
+--- a/pkgs/development/libraries/soci/default.nix
++++ b/pkgs/development/libraries/soci/default.nix
+@@ -7,7 +7,11 @@
+ , boost
+ , lib, stdenv
+ }:
+-
++let
++  input_darwin_kerberos = builtins.attrValues {
++    inherit (darwin.apple_sdk_11_0.frameworks) Kerberos;
++  };
++in
+ stdenv.mkDerivation rec {
+   pname = "soci";
+   version = "4.0.2";
+@@ -32,13 +36,13 @@ stdenv.mkDerivation rec {
+ 
+   nativeBuildInputs = [
+     cmake
+-  ] ++ lib.optionals stdenv.isDarwin [
+-    darwin.apple_sdk_11_0.frameworks.Kerberos
+   ];
+   buildInputs = [
+     sqlite
+     postgresql
+     boost
++  ] ++ lib.optionals stdenv.isDarwin [
++    input_darwin_kerberos
+   ];
+ 
+   meta = with lib; {
