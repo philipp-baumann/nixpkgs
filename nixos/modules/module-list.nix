@@ -344,6 +344,7 @@
   ./services/audio/mopidy.nix
   ./services/audio/mpd.nix
   ./services/audio/mpdscribble.nix
+  ./services/audio/mympd.nix
   ./services/audio/navidrome.nix
   ./services/audio/networkaudiod.nix
   ./services/audio/roon-bridge.nix
@@ -619,6 +620,7 @@
   ./services/mail/public-inbox.nix
   ./services/mail/roundcube.nix
   ./services/mail/rspamd.nix
+  ./services/mail/rspamd-trainer.nix
   ./services/mail/rss2email.nix
   ./services/mail/schleuder.nix
   ./services/mail/spamassassin.nix
@@ -721,6 +723,7 @@
   ./services/misc/nzbget.nix
   ./services/misc/nzbhydra2.nix
   ./services/misc/octoprint.nix
+  ./services/misc/ollama.nix
   ./services/misc/ombi.nix
   ./services/misc/osrm.nix
   ./services/misc/owncast.nix
@@ -946,6 +949,7 @@
   ./services/networking/ghostunnel.nix
   ./services/networking/git-daemon.nix
   ./services/networking/globalprotect-vpn.nix
+  ./services/networking/gns3-server.nix
   ./services/networking/gnunet.nix
   ./services/networking/go-autoconfig.nix
   ./services/networking/go-neb.nix
@@ -1259,6 +1263,7 @@
   ./services/web-apps/changedetection-io.nix
   ./services/web-apps/chatgpt-retrieval-plugin.nix
   ./services/web-apps/cloudlog.nix
+  ./services/web-apps/code-server.nix
   ./services/web-apps/convos.nix
   ./services/web-apps/dex.nix
   ./services/web-apps/discourse.nix

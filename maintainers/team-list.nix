@@ -319,6 +319,7 @@ with lib.maintainers; {
       imincik
       nh2
       nialov
+      r-burns
       sikmir
       willcohen
     ];
@@ -523,7 +524,6 @@ with lib.maintainers; {
       dtzWill
       ericson2314
       lovek323
-      primeos
       qyliss
       raitobezarius
       rrbutani
@@ -766,7 +766,6 @@ with lib.maintainers; {
 
   podman = {
     members = [
-      adisbladis
       saschagrunert
       vdemeester
     ];

@@ -30,16 +30,6 @@ let
     # Override the version of some packages pinned in Home Assistant's setup.py and requirements_all.txt
 
     (self: super: {
-      aioesphomeapi = super.aioesphomeapi.overridePythonAttrs (oldAttrs: rec {
-        version = "19.2.1";
-        src = fetchFromGitHub {
-          owner = "esphome";
-          repo = "aioesphomeapi";
-          rev = "refs/tags/v${version}";
-          hash = "sha256-WSWGO0kI1m6oaImUYZ6m5WKJ+xPs/rtn5wVq1bDr+bE=";
-        };
-      });
-
       # https://github.com/home-assistant/core/pull/101913
       aiohttp = super.aiohttp.overridePythonAttrs (old: rec {
         version = "3.9.1";
@@ -50,6 +40,16 @@ let
         };
         patches = [];
         doCheck = false;
+      });
+
+      aioskybell = super.aioskybell.overridePythonAttrs (oldAttrs: rec {
+        version = "22.7.0";
+        src = fetchFromGitHub {
+          owner = "tkdrob";
+          repo = "aioskybell";
+          rev = "refs/tags/${version}";
+          hash = "sha256-aBT1fDFtq1vasTvCnAXKV2vmZ6LBLZqRCiepv1HDJ+Q=";
+        };
       });
 
       aiowatttime = super.aiowatttime.overridePythonAttrs (oldAttrs: rec {
@@ -189,15 +189,6 @@ let
         };
       });
 
-      psutil = super.psutil.overridePythonAttrs (oldAttrs: rec {
-        version = "5.9.6";
-        src = fetchPypi {
-          pname = "psutil";
-          inherit version;
-          hash = "sha256-5Lkt3NfdTN0/kAGA6h4QSTLHvOI0+4iXbio7KWRBIlo=";
-        };
-      });
-
       py-synologydsm-api = super.py-synologydsm-api.overridePythonAttrs (oldAttrs: rec {
         version = "2.1.4";
         src = fetchFromGitHub {
@@ -238,6 +229,16 @@ let
         };
       });
 
+      pydrawise = super.pydrawise.overridePythonAttrs (oldAttrs: rec {
+        version = "2023.11.0";
+        src = fetchFromGitHub {
+          owner = "dknowles2";
+          repo = "pydrawise";
+          rev = "refs/tags/${version}";
+          hash = "sha256-gKOyTvdETGzKlpU67UKaHYTIvnAX9znHIynP3BiVbt4=";
+        };
+      });
+
       pykaleidescape = super.pykaleidescape.overridePythonAttrs (oldAttrs: rec {
         version = "1.0.1";
         src = fetchFromGitHub {
@@ -263,16 +264,6 @@ let
         src = fetchPypi {
           inherit pname version;
           hash = "sha256-aaUXdm4AwSaOW7/A0BCgqFCN4LGNMK1aH/NX+K5yQnA=";
-        };
-      });
-
-      python-tado = super.python-tado.overridePythonAttrs (oldAttrs: rec {
-        version = "0.15.0";
-        src = fetchFromGitHub {
-          owner = "wmalgadey";
-          repo = "PyTado";
-          rev = "refs/tags/${version}";
-          hash = "sha256-gduqQVw/a64aDzTHFmgZu7OVB53jZb7L5vofzL3Ho6s=";
         };
       });
 
@@ -321,7 +312,7 @@ let
   extraBuildInputs = extraPackages python.pkgs;
 
   # Don't forget to run parse-requirements.py after updating
-  hassVersion = "2023.12.3";
+  hassVersion = "2024.1.0";
 
 in python.pkgs.buildPythonApplication rec {
   pname = "homeassistant";
@@ -329,7 +320,7 @@ in python.pkgs.buildPythonApplication rec {
   format = "pyproject";
 
   # check REQUIRED_PYTHON_VER in homeassistant/const.py
-  disabled = python.pythonOlder "3.10";
+  disabled = python.pythonOlder "3.11";
 
   # don't try and fail to strip 6600+ python files, it takes minutes!
   dontStrip = true;
@@ -339,13 +330,13 @@ in python.pkgs.buildPythonApplication rec {
     owner = "home-assistant";
     repo = "core";
     rev = "refs/tags/${version}";
-    hash = "sha256-pTDYiy9Ux7Rgsf9rXXF3GbaiJkTX5FA/7K2hJtiNOkQ=";
+    hash = "sha256-aNSyBr4QEK4pmYnRGW1LNuCSU5EpZtLEGQUtYL+CvUg=";
   };
 
   # Secondary source is pypi sdist for translations
   sdist = fetchPypi {
     inherit pname version;
-    hash = "sha256-cvsYkuQG4i3GG8VGJ+HGSjdvpSBLzh0BFYQQpoVq4FY=";
+    hash = "sha256-szlvSfkcPG6DGGHZ5iNtz0EBa8DVYaoGZWSlc7AEG1I=";
   };
 
   nativeBuildInputs = with python.pkgs; [
