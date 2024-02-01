@@ -2,7 +2,7 @@
 # Do not edit!
 
 {
-  version = "2024.1.0";
+  version = "2024.1.5";
   components = {
     "3_day_blinds" = ps: with ps; [
     ];
@@ -226,7 +226,8 @@
       aqualogic
     ];
     "aquostv" = ps: with ps; [
-    ]; # missing inputs: sharp_aquos_rc
+      sharp-aquos-rc
+    ];
     "aranet" = ps: with ps; [
       aioesphomeapi
       aiohttp-cors
@@ -1042,9 +1043,10 @@
       aiohttp-cors
       aiohttp-fast-url-dispatcher
       aiohttp-zlib-ng
+      dropmqttapi
       janus
       paho-mqtt
-    ]; # missing inputs: dropmqttapi
+    ];
     "dsmr" = ps: with ps; [
       dsmr-parser
     ];
@@ -1579,6 +1581,7 @@
       dbus-fast
       esphome-dashboard-api
       fnv-hash-fast
+      gardena-bluetooth
       ha-ffmpeg
       habluetooth
       hassil
@@ -1591,7 +1594,7 @@
       sqlalchemy
       webrtc-noise-gain
       zeroconf
-    ]; # missing inputs: gardena-bluetooth
+    ];
     "gaviota" = ps: with ps; [
     ];
     "gc100" = ps: with ps; [
@@ -4505,7 +4508,8 @@
       paho-mqtt
     ];
     "snmp" = ps: with ps; [
-    ]; # missing inputs: pysnmp-lextudio
+      pysnmp-lextudio
+    ];
     "snooz" = ps: with ps; [
       aioesphomeapi
       aiohttp-cors
@@ -4753,7 +4757,8 @@
       zeroconf
     ];
     "switchbot_cloud" = ps: with ps; [
-    ]; # missing inputs: switchbot-api
+      switchbot-api
+    ];
     "switcher_kis" = ps: with ps; [
       aioswitcher
     ];
@@ -5069,7 +5074,8 @@
       psutil-home-assistant
       python-kasa
       sqlalchemy
-    ]; # missing inputs: python-kasa.optional-dependencies.speedups
+    ]
+    ++ python-kasa.optional-dependencies.speedups;
     "tplink_lte" = ps: with ps; [
     ]; # missing inputs: tp-connected
     "tplink_omada" = ps: with ps; [
@@ -5252,7 +5258,8 @@
     "valve" = ps: with ps; [
     ];
     "vasttrafik" = ps: with ps; [
-    ]; # missing inputs: vtjp
+      vtjp
+    ];
     "velbus" = ps: with ps; [
       aiohttp-cors
       aiohttp-fast-url-dispatcher
@@ -5846,6 +5853,7 @@
     "doorbird"
     "dormakaba_dkey"
     "dremel_3d_printer"
+    "drop_connect"
     "dsmr"
     "dsmr_reader"
     "dte_energy_bridge"
@@ -5925,6 +5933,7 @@
     "frontier_silicon"
     "fully_kiosk"
     "garages_amsterdam"
+    "gardena_bluetooth"
     "gdacs"
     "generic"
     "generic_hygrostat"
@@ -6313,6 +6322,7 @@
     "smtp"
     "snapcast"
     "snips"
+    "snmp"
     "snooz"
     "solaredge"
     "solarlog"
@@ -6352,6 +6362,7 @@
     "switch_as_x"
     "switchbee"
     "switchbot"
+    "switchbot_cloud"
     "switcher_kis"
     "syncthing"
     "syncthru"
@@ -6392,6 +6403,7 @@
     "tomorrowio"
     "toon"
     "totalconnect"
+    "tplink"
     "tplink_omada"
     "traccar"
     "trace"

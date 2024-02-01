@@ -15,7 +15,7 @@
 , httpx
 }:
 let
-  version = "1.15.0";
+  version = "1.20.1";
 in
 buildPythonPackage rec {
   pname = "litellm";
@@ -26,7 +26,7 @@ buildPythonPackage rec {
     owner = "BerriAI";
     repo = "litellm";
     rev = "refs/tags/v${version}";
-    hash = "sha256-s3Ue/N04YZHEfEnVxPHupRSVDHxWjVse8FDlRF5yKCk=";
+    hash = "sha256-8CqYONNa6STq9GPkf2VIkZgbPorLxnIxmzEAFBaw2sM=";
   };
 
   postPatch = ''
