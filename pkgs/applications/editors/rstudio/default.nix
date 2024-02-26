@@ -43,10 +43,6 @@ let
   RSTUDIO_VERSION_PATCH  = "0";
   RSTUDIO_VERSION_SUFFIX = "+463";
   
-  # 2023-12-21: waiting for patch PR for soci to be accepted:
-  # https://github.com/NixOS/nixpkgs/pull/275884
-  # soci_patch = ./soci-patch.nix;
-  
   # qtxmlpatterns # is not in qt6 anymore; is this needed?
   inherit (qt6) qtsensors qtwebengine qtwebchannel;
 
