@@ -7,7 +7,7 @@
 , makeDesktopItem
 , copyDesktopItems
 , cmake
-, boost183
+, boost
 , zlib
 , openssl
 , R
@@ -86,7 +86,7 @@ in
 
     nativeBuildInputs = [
       cmake
-      boost183
+      boost
       qt6.wrapQtAppsHook
       unzip
       ant
@@ -98,7 +98,7 @@ in
     ];
 
     buildInputs = [
-      boost183
+      boost
       zlib
       openssl
       R
