@@ -156,6 +156,8 @@ let
       then callPackage ../development/ocaml-modules/camomile { }
       else callPackage ../development/ocaml-modules/camomile/0.8.5.nix { };
 
+    capnp = callPackage ../development/ocaml-modules/capnp { };
+
     caqti = callPackage ../development/ocaml-modules/caqti { };
 
     caqti-async = callPackage ../development/ocaml-modules/caqti/async.nix { };
@@ -910,6 +912,8 @@ let
 
     lablgtk3-gtkspell3 = callPackage ../development/ocaml-modules/lablgtk3/gtkspell3.nix { };
 
+    lablgtk3-rsvg2 = callPackage ../development/ocaml-modules/lablgtk3/rsvg2.nix { };
+
     lablgtk3-sourceview3 = callPackage ../development/ocaml-modules/lablgtk3/sourceview3.nix { };
 
     labltk = callPackage ../development/ocaml-modules/labltk {
@@ -1028,7 +1032,9 @@ let
 
     mccs = callPackage ../development/ocaml-modules/mccs { };
 
-    mdx = callPackage ../development/ocaml-modules/mdx { };
+    mdx = callPackage ../development/ocaml-modules/mdx {
+      logs = logs.override { jsooSupport = false; lwtSupport = false; };
+    };
 
     mec = callPackage ../development/ocaml-modules/mec { };
 
@@ -1127,8 +1133,6 @@ let
     mirage-flow-combinators = callPackage ../development/ocaml-modules/mirage-flow/combinators.nix { };
 
     mirage-flow-unix = callPackage ../development/ocaml-modules/mirage-flow/unix.nix { };
-
-    mirage-fs = callPackage ../development/ocaml-modules/mirage-fs { };
 
     mirage-kv = callPackage ../development/ocaml-modules/mirage-kv { };
 
@@ -1606,6 +1610,8 @@ let
 
     repr = callPackage ../development/ocaml-modules/repr { };
 
+    res = callPackage ../development/ocaml-modules/res { };
+
     resource-pooling = callPackage ../development/ocaml-modules/resource-pooling { };
 
     resto = callPackage ../development/ocaml-modules/resto { };
@@ -1806,6 +1812,8 @@ let
     twt = callPackage ../development/ocaml-modules/twt { };
 
     type_eq = callPackage ../development/ocaml-modules/type_eq { };
+
+    type_id = callPackage ../development/ocaml-modules/type_id { };
 
     tyxml = callPackage ../development/ocaml-modules/tyxml { };
 

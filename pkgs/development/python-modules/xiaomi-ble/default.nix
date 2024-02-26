@@ -17,21 +17,21 @@
 
 buildPythonPackage rec {
   pname = "xiaomi-ble";
-  version = "0.23.1";
-  format = "pyproject";
+  version = "0.26.1";
+  pyproject = true;
 
   disabled = pythonOlder "3.9";
 
   src = fetchFromGitHub {
     owner = "Bluetooth-Devices";
-    repo = pname;
+    repo = "xiaomi-ble";
     rev = "refs/tags/v${version}";
-    hash = "sha256-JH+QXCfQ1hMakJcN/QhhNQcfQRl+hBF2Xtc/TwaJxGw=";
+    hash = "sha256-ENs+n8YgOSQpN+UpYU6CI1McWPyh8hKKMUjPDUYRWjI=";
   };
 
   postPatch = ''
     substituteInPlace pyproject.toml \
-      --replace " --cov=xiaomi_ble --cov-report=term-missing:skip-covered" ""
+      --replace-fail " --cov=xiaomi_ble --cov-report=term-missing:skip-covered" ""
   '';
 
   nativeBuildInputs = [

@@ -52,6 +52,7 @@
 /pkgs/pkgs-lib                                   @infinisil
 ## Format generators/serializers
 /pkgs/pkgs-lib/formats/libconfig                 @ckiee @h7x4
+/pkgs/pkgs-lib/formats/hocon                     @h7x4
 
 # pkgs/by-name
 /pkgs/test/nixpkgs-check-by-name @infinisil
@@ -67,8 +68,8 @@
 /nixos/lib/make-disk-image.nix                 @raitobezarius
 
 # Nix, the package manager
-pkgs/tools/package-management/nix/                    @raitobezarius
-nixos/modules/installer/tools/nix-fallback-paths.nix  @raitobezarius
+pkgs/tools/package-management/nix/                    @raitobezarius @ma27
+nixos/modules/installer/tools/nix-fallback-paths.nix  @raitobezarius @ma27
 
 # Nixpkgs documentation
 /maintainers/scripts/db-to-md.sh @jtojnar @ryantm
@@ -196,6 +197,10 @@ pkgs/development/python-modules/buildcatrust/ @ajs124 @lukegb @mweinelt
 /nixos/modules/services/databases/postgresql.nix @thoughtpolice
 /nixos/tests/postgresql.nix @thoughtpolice
 
+# Linux kernel
+/pkgs/os-specific/linux/kernel    @raitobezarius
+/pkgs/top-level/linux-kernels.nix @raitobezarius
+
 # Hardened profile & related modules
 /nixos/modules/profiles/hardened.nix @joachifm
 /nixos/modules/security/hidepid.nix @joachifm
@@ -266,13 +271,13 @@ pkgs/development/python-modules/buildcatrust/ @ajs124 @lukegb @mweinelt
 /pkgs/applications/editors/vscode/extensions   @jonringer
 
 # PHP interpreter, packages, extensions, tests and documentation
-/doc/languages-frameworks/php.section.md          @aanderse @drupol @etu @globin @ma27 @talyz
-/nixos/tests/php                                  @aanderse @drupol @etu @globin @ma27 @talyz
-/pkgs/build-support/php/build-pecl.nix            @aanderse @drupol @etu @globin @ma27 @talyz
-/pkgs/build-support/php                                     @drupol @etu
-/pkgs/development/interpreters/php       @jtojnar @aanderse @drupol @etu @globin @ma27 @talyz
-/pkgs/development/php-packages                    @aanderse @drupol @etu @globin @ma27 @talyz
-/pkgs/top-level/php-packages.nix         @jtojnar @aanderse @drupol @etu @globin @ma27 @talyz
+/doc/languages-frameworks/php.section.md          @aanderse @drupol @globin @ma27 @talyz
+/nixos/tests/php                                  @aanderse @drupol @globin @ma27 @talyz
+/pkgs/build-support/php/build-pecl.nix            @aanderse @drupol @globin @ma27 @talyz
+/pkgs/build-support/php                                     @drupol
+/pkgs/development/interpreters/php       @jtojnar @aanderse @drupol @globin @ma27 @talyz
+/pkgs/development/php-packages                    @aanderse @drupol @globin @ma27 @talyz
+/pkgs/top-level/php-packages.nix         @jtojnar @aanderse @drupol @globin @ma27 @talyz
 
 # Docker tools
 /pkgs/build-support/docker                   @roberth

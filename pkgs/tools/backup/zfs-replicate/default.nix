@@ -11,12 +11,12 @@
 
 buildPythonApplication rec {
   pname = "zfs_replicate";
-  version = "3.2.5";
-  format = "pyproject";
+  version = "3.2.8";
+  pyproject = true;
 
   src = fetchPypi {
     inherit pname version;
-    hash = "sha256-3rIbPXoI2eQCoLU/l1pXEmMJh5NAzrqwZSkn9jzfUoc=";
+    hash = "sha256-q4m6/L7GZqCkvdKcWBGTfrbDC2UiFerluwNUOA+QCQU=";
   };
 
   postPatch = ''
@@ -38,8 +38,7 @@ buildPythonApplication rec {
     stringcase
   ];
 
-  # Current releases do not include tests.
-  doCheck = false;
+  doCheck = true;
 
   meta = with lib; {
     homepage = "https://github.com/alunduil/zfs-replicate";

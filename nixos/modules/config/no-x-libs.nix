@@ -30,6 +30,7 @@ with lib;
       beam = super.beam_nox;
       cairo = super.cairo.override { x11Support = false; };
       dbus = super.dbus.override { x11Support = false; };
+      fastfetch = super.fastfetch.override { vulkanSupport = false; waylandSupport = false; x11Support = false; };
       ffmpeg_4 = super.ffmpeg_4.override { ffmpegVariant = "headless"; };
       ffmpeg_5 = super.ffmpeg_5.override { ffmpegVariant = "headless"; };
       # dep of graphviz, libXpm is optional for Xpm support
@@ -66,7 +67,7 @@ with lib;
       networkmanager-vpnc = super.networkmanager-vpnc.override { withGnome = false; };
       pango = super.pango.override { x11Support = false; };
       pinentry = super.pinentry.override { enabledFlavors = [ "curses" "tty" "emacs" ]; withLibsecret = false; };
-      pipewire = super.pipewire.override { x11Support = false; };
+      pipewire = super.pipewire.override { vulkanSupport = false; x11Support = false; };
       pythonPackagesExtensions = super.pythonPackagesExtensions ++ [
         (python-final: python-prev: {
           # tk feature requires wayland which fails to compile
@@ -82,6 +83,7 @@ with lib;
       # translateManpages -> perlPackages.po4a -> texlive-combined-basic -> texlive-core-big -> libX11
       util-linux = super.util-linux.override { translateManpages = false; };
       vim-full = super.vim-full.override { guiSupport = false; };
+      vte = super.vte.override { gtkVersion = null; };
       zbar = super.zbar.override { enableVideo = false; withXorg = false; };
     }));
   };
