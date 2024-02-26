@@ -95,8 +95,8 @@ in
 
     buildInputs = [
       boost
-      zlib
       openssl
+      zlib
       R
       libuuid
       yaml-cpp
@@ -139,6 +139,9 @@ in
 
       substituteInPlace src/cpp/CMakeLists.txt \
         --replace 'SOCI_LIBRARY_DIR "/usr/lib"' 'SOCI_LIBRARY_DIR "${soci}/lib"'
+
+      substituteInPlace src/cpp/CMakeLists.txt \
+        --replace 'set(Boost_USE_STATIC_LIBS ON)' ' '
 
       substituteInPlace src/gwt/build.xml \
         --replace '@node@' ${nodejs} \
