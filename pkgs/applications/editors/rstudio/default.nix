@@ -7,7 +7,7 @@
 , makeDesktopItem
 , copyDesktopItems
 , cmake
-, boost
+, boost183
 , zlib
 , openssl
 , R
@@ -86,6 +86,8 @@ in
 
     nativeBuildInputs = [
       cmake
+      boost183
+      qt6.wrapQtAppsHook
       unzip
       ant
       jdk
@@ -96,7 +98,7 @@ in
     ];
 
     buildInputs = [
-      boost
+      boost183
       zlib
       openssl
       R
@@ -134,7 +136,6 @@ in
       ./fix-resources-path.patch
       ./pandoc-nix-path.patch
       ./use-system-quarto.patch
-      ./soci-darwin.patch
     ];
 
     postPatch = ''
