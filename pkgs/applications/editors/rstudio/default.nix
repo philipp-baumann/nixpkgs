@@ -83,9 +83,10 @@ in
     inherit pname version src RSTUDIO_VERSION_MAJOR RSTUDIO_VERSION_MINOR RSTUDIO_VERSION_PATCH RSTUDIO_VERSION_SUFFIX;
 
     nativeBuildInputs = [
+      darwin.apple_sdk.frameworks.CoreServices
+      darwin.apple_sdk.frameworks.CoreFoundation
       cmake
       boost
-      inotify-tools
       wrapQtAppsHook
       unzip
       ant
@@ -119,7 +120,7 @@ in
       "-DRSTUDIO_TARGET=${if server then "Server" else "Desktop"}"
       "-DRSTUDIO_USE_SYSTEM_SOCI=ON"
       "-DRSTUDIO_USE_SYSTEM_BOOST=ON"
-      "-DOPENSSL_ROOT_DIR=${openssl}/bin"
+      # "-DOPENSSL_ROOT_DIR=${openssl}/bin"
       "-DRSTUDIO_USE_SYSTEM_YAML_CPP=ON"
       "-DQUARTO_ENABLED=TRUE"
       "-DPANDOC_VERSION=${pandoc.version}"
@@ -139,42 +140,46 @@ in
     ];
 
     postPatch = ''
-      substituteInPlace src/cpp/core/r_util/REnvironmentPosix.cpp --replace '@R@' ${R}
+      substituteInPlace src/cpp/core/r_util/REnvironmentPosix.cpp --replace-fail '@R@' ${R}
 
       substituteInPlace src/cpp/CMakeLists.txt \
-        --replace 'SOCI_LIBRARY_DIR "/usr/lib"' 'SOCI_LIBRARY_DIR "${soci}/lib"' \
-        --replace 'set(Boost_USE_STATIC_LIBS ON)' ' ' \
-        --replace 'find_package(OpenSSL REQUIRED)' ' ' \
-        --replace 'find_package(LibR REQUIRED)' ' ' \
-        --replace 'cmake_minimum_required(VERSION 3.4.3)' ' '
+        --replace-fail 'set(Boost_USE_STATIC_LIBS ON)' ' ' \
+        --replace-fail 'find_package(OpenSSL REQUIRED)' ' ' \
+        --replace-fail "include_directories(SYSTEM \"\''${OPENSSL_INCLUDE_DIR}\")" ' ' \
+        --replace-fail 'find_package(LibR REQUIRED)' ' ' \
+        --replace-fail 'cmake_minimum_required(VERSION 3.4.3)' ' ' \
+        --replace-fail 'if(NOT APPLE AND RSTUDIO_USE_SYSTEM_SOCI)' 'if(RSTUDIO_USE_SYSTEM_SOCI)'
 
       substituteInPlace src/cpp/core/CMakeLists.txt \
-        --replace 'check_function_exists(inotify_init1 HAVE_INOTIFY_INIT1)' ' ' \
+        --replace-fail 'check_function_exists(inotify_init1 HAVE_INOTIFY_INIT1)' ' ' \
+        --replace-fail 'check_symbol_exists(SO_PEERCRED "sys/socket.h" HAVE_SO_PEERCRED)' ' ' \
+        --replace-fail 'check_function_exists(setresuid HAVE_SETRESUID)' ' ' \
+        --replace-fail 'check_function_exists(group_member HAVE_GROUP_MEMBER)' ' '
 
       substituteInPlace src/gwt/build.xml \
-        --replace '@node@' ${nodejs} \
-        --replace './lib/quarto' ${quartoSrc}
+        --replace-fail '@node@' ${nodejs} \
+        --replace-fail './lib/quarto' ${quartoSrc}
 
       substituteInPlace src/cpp/conf/rsession-dev.conf \
-        --replace '@node@' ${nodejs}
+        --replace-fail '@node@' ${nodejs}
 
       substituteInPlace src/cpp/core/libclang/LibClang.cpp \
-        --replace '@libclang@' ${llvmPackages.libclang.lib} \
-        --replace '@libclang.so@' ${llvmPackages.libclang.lib}/lib/libclang.so
+        --replace-fail '@libclang@' ${llvmPackages.libclang.lib} \
+        --replace-fail '@libclang.so@' ${llvmPackages.libclang.lib}/lib/libclang.so
 
       substituteInPlace src/cpp/session/CMakeLists.txt \
-        --replace '@pandoc@' ${pandoc} \
-        --replace '@quarto@' ${quarto}
+        --replace-fail '@pandoc@' ${pandoc} \
+        --replace-fail '@quarto@' ${quarto}
 
       substituteInPlace src/cpp/session/include/session/SessionConstants.hpp \
-        --replace '@pandoc@' ${pandoc}/bin \
-        --replace '@quarto@' ${quarto}
+        --replace-fail '@pandoc@' ${pandoc}/bin \
+        --replace-fail '@quarto@' ${quarto}
       
       substituteInPlace src/node/CMakeLists.txt \
-        --replace 'cmake_minimum_required(VERSION 3.4.3)' ' '
+        --replace-fail 'cmake_minimum_required(VERSION 3.4.3)' ' '
 
       substituteInPlace src/node/desktop/CMakeLists.txt \
-        --replace 'cmake_minimum_required(VERSION 3.4.3)' ' '
+        --replace-fail 'cmake_minimum_required(VERSION 3.4.3)' ' '
     '';
 
     hunspellDictionaries = with lib; filter isDerivation (unique (attrValues hunspellDicts));
@@ -190,6 +195,7 @@ in
     preConfigure =
       lib.optionalString stdenv.isDarwin ''
         export OPENSSL_ROOT_DIR="${openssl.out}"
+        export OPENSSL_INCLUDE_DIR="${openssl.out}/include"
         export OPENSSL_CRYPTO_LIBRARY="${openssl.out}/lib/libcrypto.so"
       '' +
     ''
@@ -231,7 +237,7 @@ in
     '';
 
     meta = {
-      broken = (stdenv.isLinux && stdenv.isAarch64);
+      # broken = (stdenv.isLinux && stdenv.isAarch64);
       inherit description;
       homepage = "https://www.rstudio.com/";
       license = lib.licenses.agpl3Only;
