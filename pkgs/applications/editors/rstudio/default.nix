@@ -11,7 +11,12 @@
 , zlib
 , openssl
 , R
-, qt6
+, qtbase # qt6
+, qmake
+, qtsensors
+, qtwebengine
+, qtwebchannel
+, wrapQtAppsHook
 , quarto
 , libuuid
 , hunspellDicts
@@ -42,9 +47,6 @@ let
   RSTUDIO_VERSION_MINOR  = "09";
   RSTUDIO_VERSION_PATCH  = "0";
   RSTUDIO_VERSION_SUFFIX = "+463";
-  
-  # qtxmlpatterns # is not in qt6 anymore; is this needed?
-  inherit (qt6) qtsensors qtwebengine qtwebchannel;
 
   src = fetchFromGitHub {
     owner = "rstudio";
@@ -83,7 +85,8 @@ in
     nativeBuildInputs = [
       cmake
       boost
-      qt6.wrapQtAppsHook
+      inotify-tools
+      wrapQtAppsHook
       unzip
       ant
       jdk
@@ -116,12 +119,13 @@ in
       "-DRSTUDIO_TARGET=${if server then "Server" else "Desktop"}"
       "-DRSTUDIO_USE_SYSTEM_SOCI=ON"
       "-DRSTUDIO_USE_SYSTEM_BOOST=ON"
+      "-DOPENSSL_ROOT_DIR=${openssl}/bin"
       "-DRSTUDIO_USE_SYSTEM_YAML_CPP=ON"
       "-DQUARTO_ENABLED=TRUE"
       "-DPANDOC_VERSION=${pandoc.version}"
       "-DCMAKE_INSTALL_PREFIX=${placeholder "out"}/lib/rstudio"
     ] ++ lib.optionals (!server) [
-      "-DQT_QMAKE_EXECUTABLE=${qt6.qmake}/bin/qmake"
+      "-DQT_QMAKE_EXECUTABLE=${qmake}/bin/qmake"
     ];
 
     # Hack RStudio to only use the input R and provided libclang.
@@ -138,10 +142,14 @@ in
       substituteInPlace src/cpp/core/r_util/REnvironmentPosix.cpp --replace '@R@' ${R}
 
       substituteInPlace src/cpp/CMakeLists.txt \
-        --replace 'SOCI_LIBRARY_DIR "/usr/lib"' 'SOCI_LIBRARY_DIR "${soci}/lib"'
+        --replace 'SOCI_LIBRARY_DIR "/usr/lib"' 'SOCI_LIBRARY_DIR "${soci}/lib"' \
+        --replace 'set(Boost_USE_STATIC_LIBS ON)' ' ' \
+        --replace 'find_package(OpenSSL REQUIRED)' ' ' \
+        --replace 'find_package(LibR REQUIRED)' ' ' \
+        --replace 'cmake_minimum_required(VERSION 3.4.3)' ' '
 
-      substituteInPlace src/cpp/CMakeLists.txt \
-        --replace 'set(Boost_USE_STATIC_LIBS ON)' ' '
+      substituteInPlace src/cpp/core/CMakeLists.txt \
+        --replace 'check_function_exists(inotify_init1 HAVE_INOTIFY_INIT1)' ' ' \
 
       substituteInPlace src/gwt/build.xml \
         --replace '@node@' ${nodejs} \
@@ -161,6 +169,12 @@ in
       substituteInPlace src/cpp/session/include/session/SessionConstants.hpp \
         --replace '@pandoc@' ${pandoc}/bin \
         --replace '@quarto@' ${quarto}
+      
+      substituteInPlace src/node/CMakeLists.txt \
+        --replace 'cmake_minimum_required(VERSION 3.4.3)' ' '
+
+      substituteInPlace src/node/desktop/CMakeLists.txt \
+        --replace 'cmake_minimum_required(VERSION 3.4.3)' ' '
     '';
 
     hunspellDictionaries = with lib; filter isDerivation (unique (attrValues hunspellDicts));
@@ -173,7 +187,12 @@ in
       hunspellDictionaries;
     dictionaries = largeDicts ++ otherDicts;
 
-    preConfigure = ''
+    preConfigure =
+      lib.optionalString stdenv.isDarwin ''
+        export OPENSSL_ROOT_DIR="${openssl.out}"
+        export OPENSSL_CRYPTO_LIBRARY="${openssl.out}/lib/libcrypto.so"
+      '' +
+    ''
       mkdir dependencies/dictionaries
       for dict in ${builtins.concatStringsSep " " dictionaries}; do
         for i in "$dict/share/hunspell/"*; do
