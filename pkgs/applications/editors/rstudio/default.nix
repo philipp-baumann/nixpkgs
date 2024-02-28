@@ -85,6 +85,7 @@ in
     nativeBuildInputs = [
       darwin.apple_sdk.frameworks.CoreServices
       darwin.apple_sdk.frameworks.CoreFoundation
+      darwin.apple_sdk.frameworks.Security
       cmake
       boost
       wrapQtAppsHook
@@ -140,6 +141,9 @@ in
     ];
 
     postPatch = ''
+      substituteInPlace CMakeGlobals.txt \
+        --replace-fail 'if(NOT DEFINED HOMEBREW_PREFIX)' 'if(DEFINED HOMEBREW_PREFIX)'
+
       substituteInPlace src/cpp/core/r_util/REnvironmentPosix.cpp --replace-fail '@R@' ${R}
 
       substituteInPlace src/cpp/CMakeLists.txt \
@@ -156,6 +160,9 @@ in
         --replace-fail 'check_function_exists(setresuid HAVE_SETRESUID)' ' ' \
         --replace-fail 'check_function_exists(group_member HAVE_GROUP_MEMBER)' ' '
 
+      substituteInPlace src/cpp/desktop/CMakeLists.txt \
+        --replace-fail 'if(NOT QT_QMAKE_EXECUTABLE)' 'if(QT_QMAKE_EXECUTABLE)'
+
       substituteInPlace src/gwt/build.xml \
         --replace-fail '@node@' ${nodejs} \
         --replace-fail './lib/quarto' ${quartoSrc}
@@ -167,6 +174,9 @@ in
         --replace-fail '@libclang@' ${llvmPackages.libclang.lib} \
         --replace-fail '@libclang.so@' ${llvmPackages.libclang.lib}/lib/libclang.so
 
+      substituteInPlace src/cpp/r/CMakeLists.txt \
+        --replace-fail 'target_link_libraries(rstudio-r "-undefined dynamic_lookup")' 'target_link_libraries(rstudio-r \"\''${LIBR_LIBRARIES}\")'
+      
       substituteInPlace src/cpp/session/CMakeLists.txt \
         --replace-fail '@pandoc@' ${pandoc} \
         --replace-fail '@quarto@' ${quarto}
