@@ -1,13 +1,13 @@
 { lib
 , stdenv
-#, mkDerivation
+, mkDerivation
 , fetchurl
 , fetchpatch
 , fetchFromGitHub
 , makeDesktopItem
 , copyDesktopItems
 , cmake
-, boost183
+, boost
 , icu
 , zlib
 , openssl
@@ -112,7 +112,6 @@ in
 
     buildInputs = [
       boost
-      boost183
       openssl
       zlib
       llvmPackages.lld
