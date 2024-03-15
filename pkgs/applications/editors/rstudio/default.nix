@@ -12,8 +12,7 @@
 , zlib
 , openssl
 , R
-, qtbase # qt6 # qt6
-# , libsForQt5
+, qtbase
 , qmake
 , qmake
 , qtsensors
