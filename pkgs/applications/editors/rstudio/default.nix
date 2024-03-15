@@ -14,12 +14,11 @@
 , R
 , qtbase
 , qmake
-, qmake
 , qtsensors
 , qttools
+, qtxmlpatterns
 , qtwebengine
 , qtwebchannel
-, wrapQtAppsHook
 , wrapQtAppsHook
 , quarto
 , libuuid
@@ -91,7 +90,6 @@ in
       darwin.apple_sdk.frameworks.CoreFoundation
       darwin.apple_sdk.frameworks.Security
       cmake
-      wrapQtAppsHook
       boost
       wrapQtAppsHook
       unzip
@@ -183,11 +181,8 @@ in
       substituteInPlace src/gwt/build.xml \
         --replace-fail '@node@' ${nodejs} \
         --replace-fail './lib/quarto' ${quartoSrc}
-        --replace-fail '@node@' ${nodejs} \
-        --replace-fail './lib/quarto' ${quartoSrc}
 
       substituteInPlace src/cpp/conf/rsession-dev.conf \
-        --replace-fail '@node@' ${nodejs}
         --replace-fail '@node@' ${nodejs}
 
       substituteInPlace src/cpp/core/libclang/LibClang.cpp \
@@ -200,18 +195,8 @@ in
       substituteInPlace src/cpp/session/CMakeLists.txt \
         --replace-fail '@pandoc@' ${pandoc} \
         --replace-fail '@quarto@' ${quarto}
-        --replace-fail '@pandoc@' ${pandoc} \
-        --replace-fail '@quarto@' ${quarto}
 
       substituteInPlace src/cpp/session/include/session/SessionConstants.hpp \
-        --replace-fail '@pandoc@' ${pandoc}/bin \
-        --replace-fail '@quarto@' ${quarto}
-      
-      substituteInPlace src/node/CMakeLists.txt \
-        --replace-fail 'cmake_minimum_required(VERSION 3.4.3)' ' '
-
-      substituteInPlace src/node/desktop/CMakeLists.txt \
-        --replace-fail 'cmake_minimum_required(VERSION 3.4.3)' ' '
         --replace-fail '@pandoc@' ${pandoc}/bin \
         --replace-fail '@quarto@' ${quarto}
       
