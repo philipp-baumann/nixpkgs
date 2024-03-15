@@ -41,7 +41,6 @@
 , pam
 , nixosTests
 , darwin
-, darwin
 }:
 
 let
