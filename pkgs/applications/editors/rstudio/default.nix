@@ -1,19 +1,23 @@
 { lib
 , stdenv
-#, mkDerivation
+, mkDerivation
 , fetchurl
 , fetchpatch
 , fetchFromGitHub
 , makeDesktopItem
 , copyDesktopItems
 , cmake
-, boost
+, boost183
+, icu
 , zlib
 , openssl
 , R
 , qtbase # qt6
+# , libsForQt5
 , qmake
+, qtxmlpatterns
 , qtsensors
+, qttools
 , qtwebengine
 , qtwebchannel
 , wrapQtAppsHook
@@ -78,16 +82,12 @@ let
 
   description = "Set of integrated tools for the R language";
 in
-(if server then stdenv.mkDerivation else stdenv.mkDerivation)
+(if server then stdenv.mkDerivation else mkDerivation)
   (rec {
     inherit pname version src RSTUDIO_VERSION_MAJOR RSTUDIO_VERSION_MINOR RSTUDIO_VERSION_PATCH RSTUDIO_VERSION_SUFFIX;
 
     nativeBuildInputs = [
-      darwin.apple_sdk.frameworks.CoreServices
-      darwin.apple_sdk.frameworks.CoreFoundation
-      darwin.apple_sdk.frameworks.Security
       cmake
-      boost
       wrapQtAppsHook
       unzip
       ant
@@ -96,11 +96,17 @@ in
       nodejs
     ] ++ lib.optionals (!server) [
       copyDesktopItems
+    ] ++ lib.optionals stdenv.isDarwin [
+      llvmPackages.lld
+      darwin.apple_sdk.frameworks.CoreServices
+      darwin.apple_sdk.frameworks.CoreFoundation
+      darwin.apple_sdk.frameworks.Security
     ];
 
     buildInputs = [
-      boost
+      boost183
       openssl
+      llvmPackages.lld
       zlib
       R
       libuuid
@@ -112,6 +118,9 @@ in
       sqlite.dev
       pam
     ] else [
+      icu
+      qtbase
+      qtxmlpatterns
       qtsensors
       qtwebengine
       qtwebchannel
@@ -121,7 +130,7 @@ in
       "-DRSTUDIO_TARGET=${if server then "Server" else "Desktop"}"
       "-DRSTUDIO_USE_SYSTEM_SOCI=ON"
       "-DRSTUDIO_USE_SYSTEM_BOOST=ON"
-      # "-DOPENSSL_ROOT_DIR=${openssl}/bin"
+      "-DOPENSSL_ROOT_DIR=${openssl.out}"
       "-DRSTUDIO_USE_SYSTEM_YAML_CPP=ON"
       "-DQUARTO_ENABLED=TRUE"
       "-DPANDOC_VERSION=${pandoc.version}"
@@ -142,14 +151,15 @@ in
 
     postPatch = ''
       substituteInPlace CMakeGlobals.txt \
-        --replace-fail 'if(NOT DEFINED HOMEBREW_PREFIX)' 'if(DEFINED HOMEBREW_PREFIX)'
+        --replace-fail 'if(NOT DEFINED HOMEBREW_PREFIX)' 'if(DEFINED HOMEBREW_PREFIX)' \
+        --replace-fail 'elseif(APPLE AND UNAME_M STREQUAL arm64)' 'elseif(NOT APPLE AND UNAME_M STREQUAL arm64)'
 
       substituteInPlace src/cpp/core/r_util/REnvironmentPosix.cpp --replace-fail '@R@' ${R}
 
       substituteInPlace src/cpp/CMakeLists.txt \
         --replace-fail 'set(Boost_USE_STATIC_LIBS ON)' ' ' \
         --replace-fail 'find_package(OpenSSL REQUIRED)' ' ' \
-        --replace-fail "include_directories(SYSTEM \"\''${OPENSSL_INCLUDE_DIR}\")" ' ' \
+        --replace-fail "include_directories(SYSTEM \"\''${OPENSSL_INCLUDE_DIR}\")" "include_directories(SYSTEM \"\''${openssl.dev}/include\")" \
         --replace-fail 'find_package(LibR REQUIRED)' ' ' \
         --replace-fail 'cmake_minimum_required(VERSION 3.4.3)' ' ' \
         --replace-fail 'if(NOT APPLE AND RSTUDIO_USE_SYSTEM_SOCI)' 'if(RSTUDIO_USE_SYSTEM_SOCI)'
@@ -160,8 +170,9 @@ in
         --replace-fail 'check_function_exists(setresuid HAVE_SETRESUID)' ' ' \
         --replace-fail 'check_function_exists(group_member HAVE_GROUP_MEMBER)' ' '
 
-      substituteInPlace src/cpp/desktop/CMakeLists.txt \
-        --replace-fail 'if(NOT QT_QMAKE_EXECUTABLE)' 'if(QT_QMAKE_EXECUTABLE)'
+       substituteInPlace src/cpp/desktop/CMakeLists.txt \
+        --replace-fail 'if(NOT QT_QMAKE_EXECUTABLE)' 'if(QT_QMAKE_EXECUTABLE)' \
+        --replace-fail 'elseif(APPLE)' 'elseif(NOT APPLE)'
 
       substituteInPlace src/gwt/build.xml \
         --replace-fail '@node@' ${nodejs} \
@@ -172,7 +183,7 @@ in
 
       substituteInPlace src/cpp/core/libclang/LibClang.cpp \
         --replace-fail '@libclang@' ${llvmPackages.libclang.lib} \
-        --replace-fail '@libclang.so@' ${llvmPackages.libclang.lib}/lib/libclang.so
+        --replace-fail '@libclang.so@' ${llvmPackages.libclang.lib}/lib/libclang.dylib
 
       substituteInPlace src/cpp/r/CMakeLists.txt \
         --replace-fail 'target_link_libraries(rstudio-r "-undefined dynamic_lookup")' 'target_link_libraries(rstudio-r \"\''${LIBR_LIBRARIES}\")'
@@ -205,7 +216,7 @@ in
     preConfigure =
       lib.optionalString stdenv.isDarwin ''
         export OPENSSL_ROOT_DIR="${openssl.out}"
-        export OPENSSL_INCLUDE_DIR="${openssl.out}/include"
+        export OPENSSL_INCLUDE_DIR="${openssl.dev}/include"
         export OPENSSL_CRYPTO_LIBRARY="${openssl.out}/lib/libcrypto.so"
       '' +
     ''
