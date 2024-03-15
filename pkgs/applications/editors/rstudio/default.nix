@@ -1,6 +1,6 @@
 { lib
 , stdenv
-, mkDerivation
+#, mkDerivation
 , fetchurl
 , fetchpatch
 , fetchFromGitHub
@@ -12,14 +12,15 @@
 , zlib
 , openssl
 , R
-, qtbase # qt6
+, qtbase # qt6 # qt6
 # , libsForQt5
 , qmake
-, qtxmlpatterns
+, qmake
 , qtsensors
 , qttools
 , qtwebengine
 , qtwebchannel
+, wrapQtAppsHook
 , wrapQtAppsHook
 , quarto
 , libuuid
@@ -40,6 +41,7 @@
 , sqlite
 , pam
 , nixosTests
+, darwin
 , darwin
 }:
 
@@ -82,12 +84,17 @@ let
 
   description = "Set of integrated tools for the R language";
 in
-(if server then stdenv.mkDerivation else mkDerivation)
+(if server then stdenv.mkDerivation else stdenv.mkDerivation)
   (rec {
     inherit pname version src RSTUDIO_VERSION_MAJOR RSTUDIO_VERSION_MINOR RSTUDIO_VERSION_PATCH RSTUDIO_VERSION_SUFFIX;
 
     nativeBuildInputs = [
+      darwin.apple_sdk.frameworks.CoreServices
+      darwin.apple_sdk.frameworks.CoreFoundation
+      darwin.apple_sdk.frameworks.Security
       cmake
+      wrapQtAppsHook
+      boost
       wrapQtAppsHook
       unzip
       ant
@@ -104,8 +111,10 @@ in
     ];
 
     buildInputs = [
+      boost
       boost183
       openssl
+      zlib
       llvmPackages.lld
       zlib
       R
@@ -177,8 +186,11 @@ in
       substituteInPlace src/gwt/build.xml \
         --replace-fail '@node@' ${nodejs} \
         --replace-fail './lib/quarto' ${quartoSrc}
+        --replace-fail '@node@' ${nodejs} \
+        --replace-fail './lib/quarto' ${quartoSrc}
 
       substituteInPlace src/cpp/conf/rsession-dev.conf \
+        --replace-fail '@node@' ${nodejs}
         --replace-fail '@node@' ${nodejs}
 
       substituteInPlace src/cpp/core/libclang/LibClang.cpp \
@@ -191,8 +203,18 @@ in
       substituteInPlace src/cpp/session/CMakeLists.txt \
         --replace-fail '@pandoc@' ${pandoc} \
         --replace-fail '@quarto@' ${quarto}
+        --replace-fail '@pandoc@' ${pandoc} \
+        --replace-fail '@quarto@' ${quarto}
 
       substituteInPlace src/cpp/session/include/session/SessionConstants.hpp \
+        --replace-fail '@pandoc@' ${pandoc}/bin \
+        --replace-fail '@quarto@' ${quarto}
+      
+      substituteInPlace src/node/CMakeLists.txt \
+        --replace-fail 'cmake_minimum_required(VERSION 3.4.3)' ' '
+
+      substituteInPlace src/node/desktop/CMakeLists.txt \
+        --replace-fail 'cmake_minimum_required(VERSION 3.4.3)' ' '
         --replace-fail '@pandoc@' ${pandoc}/bin \
         --replace-fail '@quarto@' ${quarto}
       
