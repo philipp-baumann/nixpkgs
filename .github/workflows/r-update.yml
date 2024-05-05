@@ -1,0 +1,76 @@
+# after https://github.com/b-rodrigues/nixpkgs/blob/r-daily-source/.github/workflows/r-daily.yml
+name: r-daily
+
+on:
+  push:
+    branches:
+      - r-daily-source
+
+jobs:
+  r-daily-update:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.MY_PAT }}
+      GITHUB_TOKEN: ${{ secrets.MY_PAT }}
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.MY_PAT }}
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          logger: pretty
+          log-directives: nix_installer=trace
+          backtrace: full
+
+      - name: Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Build development environment
+        run: |
+          nix-build r-daily.nix
+
+      - name: Configure git
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Synching fork
+        run: |
+          git remote add upstream https://github.com/NixOS/nixpkgs
+          git checkout r-daily-source
+          git fetch upstream
+          git reset --hard upstream/master
+
+      - name: Fix for rJava and rtracklayer
+        run: |
+          sed -i 's|rJava = with pkgs; \[ zlib bzip2\.dev icu xz\.dev pcre\.dev jdk libzip \];|rJava = with pkgs; \[ zlib bzip2\.dev icu xz\.dev pcre\.dev jdk libzip libdeflate \];|g' pkgs/development/r-modules/default.nix
+          sed -i 's|rtracklayer = \[ pkgs\.zlib\.dev \];|rtracklayer = \[ pkgs\.zlib\.dev pkgs\.curl\.dev \];|g' pkgs/development/r-modules/default.nix
+
+      - name: Update R packages
+        run: |
+          cd pkgs/development/r-modules/
+          wget https://raw.githubusercontent.com/rstats-on-nix/nixpkgs/r-daily-source/pkgs/development/r-modules/generate-r-packages.R
+          # nix-shell generate-shell.nix --run "Rscript generate-r-packages.R cran > cran-packages.nix.new"
+          # nix-shell generate-shell.nix --run "Rscript generate-r-packages.R bioc > bioc-packages.nix.new"
+          # nix-shell generate-shell.nix --run "Rscript generate-r-packages.R bioc-annotation > bioc-annotation-packages.nix.new"
+          nix-shell generate-shell.nix --run "Rscript generate-r-packages.R bioc-experiment > bioc-experiment-packages.nix.new"
+
+      - name: Rename files
+        run: |
+          cd pkgs/development/r-modules/
+          # mv cran-packages.nix.new cran-packages.nix
+          # mv bioc-packages.nix.new bioc-packages.nix
+          # mv bioc-annotation-packages.nix.new bioc-annotation-packages.nix
+          mv bioc-experiment-packages.nix.new bioc-experiment-packages.nix
+
+      - name: Pushing updates
+        run: |
+          git checkout -b r-daily
+          git add .
+          git commit -m "daily update" || echo "no updated R packages in this period"
+          git push --force origin r-daily || echo "no updated R packages in this period"
