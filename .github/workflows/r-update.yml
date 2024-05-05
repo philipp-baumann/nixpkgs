@@ -30,10 +30,6 @@ jobs:
       - name: Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - name: Build development environment
-        run: |
-          nix-build r-daily.nix
-
       - name: Configure git
         run: |
           git config user.name 'github-actions[bot]'
@@ -46,6 +42,13 @@ jobs:
           git fetch upstream
           git reset --hard upstream/master
 
+      - name: Get patches
+        run: |
+          wget https://raw.githubusercontent.com/rstats-on-nix/nixpkgs/r-daily/generate-r-packages_escapeName.patch
+
+      - name: Apply patches
+        run: git apply generate-r-packages_escapeName.patch
+
       - name: Fix for rJava and rtracklayer
         run: |
           sed -i 's|rJava = with pkgs; \[ zlib bzip2\.dev icu xz\.dev pcre\.dev jdk libzip \];|rJava = with pkgs; \[ zlib bzip2\.dev icu xz\.dev pcre\.dev jdk libzip libdeflate \];|g' pkgs/development/r-modules/default.nix
@@ -54,6 +57,7 @@ jobs:
       - name: Update R packages
         run: |
           cd pkgs/development/r-modules/
+          # overwrite what we have in patch
           wget https://raw.githubusercontent.com/rstats-on-nix/nixpkgs/r-daily-source/pkgs/development/r-modules/generate-r-packages.R
           # nix-shell generate-shell.nix --run "Rscript generate-r-packages.R cran > cran-packages.nix.new"
           # nix-shell generate-shell.nix --run "Rscript generate-r-packages.R bioc > bioc-packages.nix.new"
