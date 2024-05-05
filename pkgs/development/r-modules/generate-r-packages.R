@@ -45,41 +45,12 @@ nixPrefetch <- function(name, version) {
       archiveUrl <- paste0(mirrorUrl, "Archive/", name, "/", name, "_", version, ".tar.gz")
       cmd <- paste0(cmd, " || wget -q -O '", tmp, "' '", archiveUrl, "'")
     }
-
-    wget_out <- system2(command = cmd, stdout = TRUE, stderr = TRUE)
-    if (attributes(wget_out)$status != 0) {
-      stop(paste(name, version, "could not be downloaded.", wget_out))
-    }
-
-    memfree()
-
-    hash_out <- system2(
-      command = "nix-hash",
-      args = c("--type sha256", "--base32", "--flat", tmp),
-      stdout = TRUE, stderr = TRUE
-    )
-    if (attributes(hash_out)$status != 0) {
-      stop(paste(tmp, "could not be hashed.", hash_out))
-    }
-
-    cat("added ", name, " v", version)
-
-    system2(command = "rm", args = c("-rf", tmp))
+    cmd <- paste0(cmd, " && nix-hash --type sha256 --base32 --flat '", tmp, "'")
+    cmd <- paste0(cmd, " && echo >&2 '  added ", name, " v", version, "'")
+    cmd <- paste0(cmd, " ; rm -rf '", tmp, "'")
+    system(cmd, intern=TRUE)
   }
 
-}
-
-memfree <- function() {
-  if (R.Version()$os == "linux-gnu") {
-    mem <- as.numeric(
-      system("awk '/MemFree/ {print $2}' /proc/meminfo", intern = TRUE)
-    )
-    mem_gib <- mem / 1000 / 1000
-    cat("Current free in memory in socket cluster node is", as.character(mem_gib), "GiB")
-    return(mem_gib)
-  } else {
-    return(NA)
-  }
 }
 
 escapeName <- function(name) {
@@ -108,13 +79,12 @@ pkgs <- pkgs[order(Package)]
 
 write(paste("updating", mirrorType, "packages"), stderr())
 
-nnodes <- commandArgs(trailingOnly = TRUE)[2]
+nnodes <- as.integer(commandArgs(trailingOnly = TRUE)[2])
 is_parallel <- !is.na(nnodes)
 if (isTRUE(is_parallel)) {
   # socket node cluster by default
   cl <- makeCluster(nnodes)
-  clusterExport(cl, c("nixPrefetch","readFormatted", "mirrorUrl", "mirrorType", "knownPackages",
-    "memfree"))
+  clusterExport(cl, c("nixPrefetch","readFormatted", "mirrorUrl", "mirrorType", "knownPackages"))
   pkgs$sha256 <- parApply(cl, pkgs, 1, function(p) nixPrefetch(p[1], p[2]))
 } else {
   # fall back to sequential processing
