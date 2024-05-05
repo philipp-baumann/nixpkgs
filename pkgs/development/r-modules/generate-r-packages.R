@@ -46,7 +46,7 @@ nixPrefetch <- function(name, version) {
       cmd <- paste0(cmd, " || wget -q -O '", tmp, "' '", archiveUrl, "'")
     }
 
-    wget_out <- system2(cmd = cmd, stdout = TRUE, stderr = TRUE)
+    wget_out <- system2(command = cmd, stdout = TRUE, stderr = TRUE)
     if (attributes(wget_out)$status != 0) {
       stop(paste(name, version, "could not be downloaded.", wget_out))
     }
@@ -54,7 +54,7 @@ nixPrefetch <- function(name, version) {
     memfree()
 
     hash_out <- system2(
-      cmd = "nix-hash",
+      command = "nix-hash",
       args = c("--type sha256", "--base32", "--flat", tmp),
       stdout = TRUE, stderr = TRUE
     )
@@ -64,7 +64,7 @@ nixPrefetch <- function(name, version) {
 
     cat("added ", name, " v", version)
 
-    system2(cmd = "rm", args = c("-rf", tmp))
+    system2(command = "rm", args = c("-rf", tmp))
   }
 
 }
@@ -75,11 +75,11 @@ memfree <- function() {
       system("awk '/MemFree/ {print $2}' /proc/meminfo", intern = TRUE)
     )
     mem_gib <- mem / 1000 / 1000
+    cat("Current free in memory in socket cluster node is", as.character(mem_gib), "GiB")
+    return(mem_gib)
+  } else {
+    return(NA)
   }
-
-  cat("Current free in memory in socket cluster node is", as.character(mem_gib), "GiB")
-
-  return(mem_gib)
 }
 
 escapeName <- function(name) {
