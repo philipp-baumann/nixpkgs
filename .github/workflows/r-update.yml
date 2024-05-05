@@ -58,7 +58,7 @@ jobs:
         run: |
           cd pkgs/development/r-modules/
           # overwrite what we have in patch
-          wget https://raw.githubusercontent.com/rstats-on-nix/nixpkgs/r-daily-source/pkgs/development/r-modules/generate-r-packages.R
+          wget https://raw.githubusercontent.com/philipp-baumann/nixpkgs/r-daily-source/pkgs/development/r-modules/generate-r-packages.R
           # nix-shell generate-shell.nix --run "Rscript generate-r-packages.R cran > cran-packages.nix.new"
           # nix-shell generate-shell.nix --run "Rscript generate-r-packages.R bioc > bioc-packages.nix.new"
           # nix-shell generate-shell.nix --run "Rscript generate-r-packages.R bioc-annotation > bioc-annotation-packages.nix.new"
